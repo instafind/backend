@@ -54,7 +54,8 @@ app.get("/auth", function(req, res) {
 						url: onionURL,
 						method:"GET"
 					}, function(error, response, body) {
-						raw_onion = raw_onion["data"]
+						raw_onion = JSON.parse(body);
+						raw_onion = raw_onion["data"];
 						for  (var post of raw_onion) {
 							console.log(post["location"]["name"]);
 							user_data.push( {
@@ -124,7 +125,6 @@ app.get("/data", function(req, res) {
 
 			  	// add into list of interest point distances
 			  	data = JSON.parse(body);
-
 			  	data = {
 					"image_url": corLocation["image_url"],
 					"location": {
@@ -133,7 +133,8 @@ app.get("/data", function(req, res) {
 					},
 					"distance": data["rows"][0]["elements"][0]["distance"],
 					"duration": data["rows"][0]["elements"][0]["duration"],
-					"name": corLocation["name"]
+					"name": corLocation["name"],
+					"address": data["destination_addresses"][0]
 			  	};
 			  	list.push(data);
 			  }
@@ -149,7 +150,9 @@ app.get("/data", function(req, res) {
 		list.sort (function(js1, js2) {
 			return js1["duration"]["value"] - js2["duration"]["value"];
 		});
+		console.log("==================");
 		console.log(list);
+		console.log("==================")
 
 		//push data back
 		//return type template

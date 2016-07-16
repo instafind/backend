@@ -21,6 +21,7 @@ app.use('/', express.static('public'));
 var user_data = []
 
 app.get("/auth", function(req, res) {
+	user_data = []
 	var clientCode = req.param("code");
 
 	console.log(clientCode)

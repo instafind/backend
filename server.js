@@ -13,16 +13,29 @@ var ORI = "origins="
 var DEST = "destinations="
 
 // MAP_API + RETURN_TYPE + ? +UNITS + & + MODE + & + ORI + & + DEST + & + API_KEY
+
+//landing
 app.use('/', express.static('public'));
 
+
+app.get("/auth", function(req, res) {
+	var clientID = req.param("code");
+	console.log(clientID);
+});
+
 app.get("/insta", function(req, res) {
-	var instaURL = "https://api.instagram.com/oauth/authorize/?client_id=a0cb68128abd4ef99d23451fe30657a6&redirect_uri=http://10.16.20.247:8083/&scope=public_content+follower_list&response_type=code"
+	var instaURL = "https://api.instagram.com/oauth/authorize/?client_id=a0cb68128abd4ef99d23451fe30657a6&redirect_uri=http://10.16.20.247:8083/auth&response_type=code&scope=public_content"
 	request( {
 			url: instaURL,
 			method: "GET"
 		}, function (error, response, body) {
 		  if (!error && response.statusCode == 200) {
-		  		res.send(response.body);
+		  		res.redirect(instaURL, function (){
+		  		res.redirect("http://10.16.20.247:8083/#!/search");
+
+
+		  		});
+		  		// res.redirect("http://10.16.20.247:8083/#!/search");
 		}
 	});
 });

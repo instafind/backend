@@ -63,7 +63,7 @@ app.get("/auth", function(req, res) {
 								"name": post["location"]["name"],
 								"latitude": post["location"]["latitude"],
 								"longitude": post["location"]["longitude"],
-								"image_url": post["images"]
+								"image_url": post["images"]["standard_resolution"]["url"]
 							});
 						}
 					});
@@ -100,37 +100,23 @@ app.get("/data", function(req, res) {
 	// sample target locations (Insta API)
 	console.log(user_data);
 	var interestList = user_data
-	// var interestList = [
-	// 	{
-	// 		"name": "Apple",
-	// 		"latitude": 37.332144,
-	// 		"longitude":-122.031234,
-	// 		"image_url": "http://imgur.com/gallery/0DQQTAv"
-	// 	},
-	// 	{
-	// 		"name": "Shoreline Park",
-	// 		"latitude": 37.426811,
-	// 		"longitude":-122.078655,
-	// 		"image_url": "http://imgur.com/gallery/0DQQTAv"
-	// 	}
-	// ]
 
 	var list = []
 	for (i = 0; i < interestList.length; i++) {
-		
+		var corLocation = interestList[i];
+		(function(corLocation) {
 		//generate request url
 		var reqUrl = MAP_API + RETURN_TYPE
 			+ "?" + UNITS
 			+ "&" + MODE
 			+ "&" + ORI
-				+ interestList[i].latitude + ","
-				+ interestList[i].longitude
+				+ myLocation.latitude + ","
+				+ myLocation.longitude
 			+ "&" + DEST
-				+ interestList[i]["latitude"] + ","
-				+ interestList[i]["longitude"]
+				+ corLocation["latitude"] + ","
+				+ corLocation["longitude"]
 			+ "&" + API_KEY;
-		var corLocation = interestList[i];
-		(function(corLocation) {
+		
 			request( {
 				url: reqUrl,
 				method: "GET"
@@ -165,9 +151,6 @@ app.get("/data", function(req, res) {
 			return js1["duration"]["value"] - js2["duration"]["value"];
 		});
 		console.log(list);
-		//push data back
-		//return type template
-
 		res.json(list);
 	}, 300);
 

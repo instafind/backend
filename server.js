@@ -3,8 +3,6 @@ var app = express();
 var path = require("path");
 var request = require("request")
 
-app.use(express.static('public'));
-
 //static var for google maps api
 var API_KEY = "key=AIzaSyCx6MMMEoT9dFT0okzS77vk80sNqLJIgjo"
 var MAP_API = "https://maps.googleapis.com/maps/api/distancematrix/"
@@ -15,6 +13,7 @@ var ORI = "origins="
 var DEST = "destinations="
 
 // MAP_API + RETURN_TYPE + ? +UNITS + & + MODE + & + ORI + & + DEST + & + API_KEY
+app.use('/', express.static('public'));
 
 app.get("/insta", function(req, res) {
 	var instaURL = "https://api.instagram.com/oauth/authorize/?client_id=a0cb68128abd4ef99d23451fe30657a6&redirect_uri=http://10.16.20.247:8083/&scope=public_content+follower_list&response_type=code"

@@ -21,6 +21,7 @@ app.use('/', express.static('public'));
 app.get("/auth", function(req, res) {
 	var clientID = req.param("code");
 	console.log(clientID);
+	res.redirect("/#!/search");
 });
 
 app.get("/insta", function(req, res) {
@@ -30,12 +31,7 @@ app.get("/insta", function(req, res) {
 			method: "GET"
 		}, function (error, response, body) {
 		  if (!error && response.statusCode == 200) {
-		  		res.redirect(instaURL, function (){
-		  		res.redirect("http://10.16.20.247:8083/#!/search");
-
-
-		  		});
-		  		// res.redirect("http://10.16.20.247:8083/#!/search");
+		  	res.redirect(instaURL);
 		}
 	});
 });

@@ -18,10 +18,53 @@ var DEST = "destinations="
 app.use('/', express.static('public'));
 
 
+var user_data = []
+
 app.get("/auth", function(req, res) {
-	var clientID = req.param("code");
-	console.log(clientID);
+	var clientCode = req.param("code");
+
+	console.log(clientCode)
+	var reqUrl = "https://api.instagram.com/oauth/access_token"
+	var reqBody = {
+		"client_id":"a0cb68128abd4ef99d23451fe30657a6",
+		"client_secret":"7834c945f05c4a2baf4f96cb088e0cd6",
+		"grant_type":"authorization_code",
+		"redirect_uri":"http://10.16.20.247:8083/auth",
+		"code": clientCode
+	}
+	request( {
+			url: reqUrl,
+			method: "POST",
+			form: reqBody
+		}, function (error, response, body) {
+		  if (!error && response.statusCode == 200) {
+		  	// console.log(body)
+		  	access_data = JSON.parse(body);
+		  	access_token = access_data["access_token"];
+		  	var finalURL = "https://api.instagram.com/v1/users/search?q=hypotheticaleatsinsf&access_token=" + access_token
+			request({
+					url : finalURL,
+					method: "GET"
+				}, function(error, response, body) {
+					followed_data = JSON.parse(body);
+					var id = followed_data["data"][0]["id"];
+					// console.log(id);
+					var onionURL ="https://api.instagram.com/v1/users/" + id + "/media/recent/?access_token=" + access_token;
+					request({
+						url: onionURL,
+						method:"GET"
+					}, function(error, response, body) {
+
+						var raw_onion = JSON.parse(body);
+						
+					});
+				}
+			);
+		}
+	});
 	res.redirect("/#!/search");
+
+
 });
 
 app.get("/insta", function(req, res) {
@@ -106,8 +149,8 @@ app.get("/data", function(req, res) {
 		console.log(list);
 		//push data back
 		//return type template
-		res.send(JSON.stringify(list))
-		res.sendStatus(200)
+		res.send(JSON.stringify(list));
+		res.sendStatus(200);
 	}, 500);
 
 

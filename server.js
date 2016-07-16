@@ -15,42 +15,64 @@ var DEST = "destinations="
 
 // MAP_API + RETURN_TYPE + ? +UNITS + & + MODE + & + ORI + & + DEST + & + API_KEY
 
-
-var requestString = "https://maps.googleapis.com/maps/api/distancematrix/json?untis=imperial&mode=walking&origins=37.427156,-122.080711&destinations=37.423370,-122.071474&key=AIzaSyCx6MMMEoT9dFT0okzS77vk80sNqLJIgjo"
-//landing point
+//landing
 app.get('/', function (req, res) {
-	res.sendFile('index.html' , { root : path.join(__dirname, "../frontend")});
+	res.sendFile('index.html' , { root : path.join(__dirname, "../frontend/dist")});
 });
+
+
+app.get("/insta", function(req, res) {
+	var instaURL = "https://api.instagram.com/oauth/authorize/?client_id=a0cb68128abd4ef99d23451fe30657a6&redirect_uri=http://10.16.20.247:8083/&scope=public_content+follower_list&response_type=code"
+	request( {
+			url: instaURL,
+			method: "GET"
+		}, function (error, response, body) {
+		  if (!error && response.statusCode == 200) {
+		  		res.send(response.body);
+		}
+	});
+});
+
 
 // template request on geo data
 app.get("/data", function(req, res) {
-
 	// sample location data (acquired)
 	var myLocation = {
-			"lattitude":37.4233111,
-			"longtitude": -122.07064579999997 
+			"latitude":37.423601, 
+			"longtitude": -122.070718
 	};
 
 	// sample target locations (Insta API)
 	var interestList = [ 
 		{
-			"lattitude": 37.332144, 
-			"longtitude":-122.031234
+			"name": "Apple",
+			"latitude": 37.332144, 
+			"longtitude":-122.031234,
+			"image_url": "http://imgur.com/gallery/0DQQTAv"
 		},
 		{
-			"lattitude": 37.426811, 
-			"longtitude":-122.078655
+			"name": "Shoreline Park",
+			"latitude": 37.426811, 
+			"longtitude":-122.078655,
+			"image_url": "http://imgur.com/gallery/0DQQTAv"
 		}
 	]
 
 	// query for every interest point =) 
 	var list = []
 	for (i = 0; i < interestList.length; i++) {
-
-		//generat request url 
-		var reqUrl = MAP_API + RETURN_TYPE + "?" +UNITS + "&" + MODE + "&" + ORI + myLocation["lattitude"]
-		+ "," + myLocation["longtitude"] + "&" + DEST + interestList[i]["lattitude"] + "," +  interestList[i]["longtitude"] + "&" + API_KEY
-		console.log(reqUrl);
+		var corLocation = interestList[i]
+		//generate request url 
+		var reqUrl = MAP_API + RETURN_TYPE 
+			+ "?" + UNITS 
+			+ "&" + MODE 
+			+ "&" + ORI 
+				+ myLocation.latitude + "," 
+				+ myLocation.longtitude 
+			+ "&" + DEST 
+				+ corLocation["latitude"] + "," 
+				+ corLocation["longtitude"] 
+			+ "&" + API_KEY;
 
 		//issue request to Google Maps API
 		request( {
@@ -59,39 +81,37 @@ app.get("/data", function(req, res) {
 		}, function (error, response, body) {
 		  if (!error && response.statusCode == 200) {
 		  	// add into list of interest point distances
-		  	list.push(JSON.parse(body)["rows"][0]["elements"]);
-			console.log(list);
+		  	data = JSON.parse(body);
+
+		  	data = {
+				"image_url": corLocation["image_url"],
+				"location": corLocation,
+				"distance": data["rows"][0]["elements"][0]["distance"],
+				"duration": data["rows"][0]["elements"][0]["duration"],
+				"name": corLocation["name"]
+		  	};
+		  	list.push(data);
 		  }
 		});
 
 	}
+	// rank location in order
+	setTimeout(function() {
+		list.sort (function(js1, js2) {
+			return js1["duration"]["value"] - js2["duration"]["value"];
+		});
+		console.log(list);
+		//push data back
+		//return type template
+		res.send(JSON.stringify(list))
+		res.sendStatus(200)
+	}, 500);
+	
 
-	res.sendFile('index.html' , { root : path.join(__dirname, "../frontend")});
-
-	//push data back
-	// yet to be implemented
-
-	//return type template
-	// var dummyJSON = [{
-	// 	"url": "http://imgur.com/gallery/0DQQTAv",
-	// 	"location": {
-	// 		"lattitude":37.4233111,
-	// 		"longtitude": 122.07064579999997 
-	// 	},
-	// 	"name": "LinkedIn"
-	// }]
 });
 
 
-// tempalte post request
-app.post('/choice', function(req, res) {	
-	var choiceNumber = req.param("choice");
-	choiceNumber = parseInt(choiceNumber);
-	console.log(choiceNumber);
-	// res.sendFile("/Users/zliu/Desktop/InstaFind/backend/b.html");
-});
-
-app.listen(8080, function(){
+app.listen(8083, function(){
     //Callback triggered when server is successfully listening. Hurray!
-    console.log("Server listening on: http://localhost:8080");
+    console.log("Server listening on: http://localhost:8083");
 });

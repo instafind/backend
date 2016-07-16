@@ -3,8 +3,9 @@ var app = express();
 var path = require("path");
 var request = require("request")
 
+app.use(express.static('public'));
 
-//static var for google maps api 
+//static var for google maps api
 var API_KEY = "key=AIzaSyCx6MMMEoT9dFT0okzS77vk80sNqLJIgjo"
 var MAP_API = "https://maps.googleapis.com/maps/api/distancematrix/"
 var RETURN_TYPE = "json"
@@ -14,12 +15,6 @@ var ORI = "origins="
 var DEST = "destinations="
 
 // MAP_API + RETURN_TYPE + ? +UNITS + & + MODE + & + ORI + & + DEST + & + API_KEY
-
-//landing
-app.get('/', function (req, res) {
-	res.sendFile('index.html' , { root : path.join(__dirname, "../frontend/dist")});
-});
-
 
 app.get("/insta", function(req, res) {
 	var instaURL = "https://api.instagram.com/oauth/authorize/?client_id=a0cb68128abd4ef99d23451fe30657a6&redirect_uri=http://10.16.20.247:8083/&scope=public_content+follower_list&response_type=code"
@@ -38,40 +33,40 @@ app.get("/insta", function(req, res) {
 app.get("/data", function(req, res) {
 	// sample location data (acquired)
 	var myLocation = {
-			"latitude":37.423601, 
+			"latitude":37.423601,
 			"longtitude": -122.070718
 	};
 
 	// sample target locations (Insta API)
-	var interestList = [ 
+	var interestList = [
 		{
 			"name": "Apple",
-			"latitude": 37.332144, 
+			"latitude": 37.332144,
 			"longtitude":-122.031234,
 			"image_url": "http://imgur.com/gallery/0DQQTAv"
 		},
 		{
 			"name": "Shoreline Park",
-			"latitude": 37.426811, 
+			"latitude": 37.426811,
 			"longtitude":-122.078655,
 			"image_url": "http://imgur.com/gallery/0DQQTAv"
 		}
 	]
 
-	// query for every interest point =) 
+	// query for every interest point =)
 	var list = []
 	for (i = 0; i < interestList.length; i++) {
 		var corLocation = interestList[i]
-		//generate request url 
-		var reqUrl = MAP_API + RETURN_TYPE 
-			+ "?" + UNITS 
-			+ "&" + MODE 
-			+ "&" + ORI 
-				+ myLocation.latitude + "," 
-				+ myLocation.longtitude 
-			+ "&" + DEST 
-				+ corLocation["latitude"] + "," 
-				+ corLocation["longtitude"] 
+		//generate request url
+		var reqUrl = MAP_API + RETURN_TYPE
+			+ "?" + UNITS
+			+ "&" + MODE
+			+ "&" + ORI
+				+ myLocation.latitude + ","
+				+ myLocation.longtitude
+			+ "&" + DEST
+				+ corLocation["latitude"] + ","
+				+ corLocation["longtitude"]
 			+ "&" + API_KEY;
 
 		//issue request to Google Maps API
@@ -106,7 +101,7 @@ app.get("/data", function(req, res) {
 		res.send(JSON.stringify(list))
 		res.sendStatus(200)
 	}, 500);
-	
+
 
 });
 

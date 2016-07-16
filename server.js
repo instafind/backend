@@ -23,7 +23,7 @@ var user_data = []
 app.get("/auth", function(req, res) {
 	var clientCode = req.param("code");
 
-	console.log(clientCode)
+	// console.log(clientCode)
 	var reqUrl = "https://api.instagram.com/oauth/access_token"
 	var reqBody = {
 		"client_id":"a0cb68128abd4ef99d23451fe30657a6",
@@ -56,7 +56,16 @@ app.get("/auth", function(req, res) {
 					}, function(error, response, body) {
 
 						var raw_onion = JSON.parse(body);
-						
+						raw_onion = raw_onion["data"]
+						for  (var post of raw_onion) {
+							console.log(post["location"]["name"]);
+							user_data.push( {
+								"name": post["location"]["name"],
+								"latitude": post["location"]["latitude"],
+								"longitude": post["location"]["longitude"],
+								"image_url": post["images"]
+							});
+						}
 					});
 				}
 			);
@@ -85,60 +94,69 @@ app.get("/data", function(req, res) {
 	// sample location data (acquired)
 	var myLocation = {
 			"latitude":37.423601,
-			"longtitude": -122.070718
+			"longitude": -122.070718
 	};
 
 	// sample target locations (Insta API)
-	var interestList = [
-		{
-			"name": "Apple",
-			"latitude": 37.332144,
-			"longtitude":-122.031234,
-			"image_url": "http://imgur.com/gallery/0DQQTAv"
-		},
-		{
-			"name": "Shoreline Park",
-			"latitude": 37.426811,
-			"longtitude":-122.078655,
-			"image_url": "http://imgur.com/gallery/0DQQTAv"
-		}
-	]
+	console.log(user_data);
+	var interestList = user_data
+	// var interestList = [
+	// 	{
+	// 		"name": "Apple",
+	// 		"latitude": 37.332144,
+	// 		"longitude":-122.031234,
+	// 		"image_url": "http://imgur.com/gallery/0DQQTAv"
+	// 	},
+	// 	{
+	// 		"name": "Shoreline Park",
+	// 		"latitude": 37.426811,
+	// 		"longitude":-122.078655,
+	// 		"image_url": "http://imgur.com/gallery/0DQQTAv"
+	// 	}
+	// ]
 
-	// query for every interest point =)
 	var list = []
 	for (i = 0; i < interestList.length; i++) {
-		var corLocation = interestList[i]
+		
 		//generate request url
 		var reqUrl = MAP_API + RETURN_TYPE
 			+ "?" + UNITS
 			+ "&" + MODE
 			+ "&" + ORI
-				+ myLocation.latitude + ","
-				+ myLocation.longtitude
+				+ interestList[i].latitude + ","
+				+ interestList[i].longitude
 			+ "&" + DEST
-				+ corLocation["latitude"] + ","
-				+ corLocation["longtitude"]
+				+ interestList[i]["latitude"] + ","
+				+ interestList[i]["longitude"]
 			+ "&" + API_KEY;
+		var corLocation = interestList[i];
+		(function(corLocation) {
+			request( {
+				url: reqUrl,
+				method: "GET"
+			}, function (error, response, body) {
+			  if (!error && response.statusCode == 200) {
 
+			  	// add into list of interest point distances
+			  	data = JSON.parse(body);
+
+			  	data = {
+					"image_url": corLocation["image_url"],
+					"location": {
+						"latitude": corLocation["latitude"],
+						"longitude": corLocation['longitude']
+					},
+					"distance": data["rows"][0]["elements"][0]["distance"],
+					"duration": data["rows"][0]["elements"][0]["duration"],
+					"name": corLocation["name"]
+			  	};
+			  	list.push(data);
+			  }
+			});
+
+		})(corLocation);
 		//issue request to Google Maps API
-		request( {
-			url: reqUrl,
-			method: "GET"
-		}, function (error, response, body) {
-		  if (!error && response.statusCode == 200) {
-		  	// add into list of interest point distances
-		  	data = JSON.parse(body);
-
-		  	data = {
-				"image_url": corLocation["image_url"],
-				"location": corLocation,
-				"distance": data["rows"][0]["elements"][0]["distance"],
-				"duration": data["rows"][0]["elements"][0]["duration"],
-				"name": corLocation["name"]
-		  	};
-		  	list.push(data);
-		  }
-		});
+		
 
 	}
 	// rank location in order
@@ -149,9 +167,9 @@ app.get("/data", function(req, res) {
 		console.log(list);
 		//push data back
 		//return type template
-		res.send(JSON.stringify(list));
-		res.sendStatus(200);
-	}, 500);
+
+		res.json(list);
+	}, 300);
 
 
 });

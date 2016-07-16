@@ -3,12 +3,46 @@ var http = require('http');
 var server = http.createServer(app);
 var app = express();
 
+var API_KEY = "key=AIzaSyCx6MMMEoT9dFT0okzS77vk80sNqLJIgjo"
+var MAP_API = "https://maps.googleapis.com/maps/api/distancematrix/"
+var RETURN_TYPE = "json"
+var UNITS = "units=imperial"
+var MODE = "mode=walking"
+var ORI = "origins="
+var DEST = "destinations="
+
+// MAP_API + RETURN_TYPE + ? +UNITS + & + MODE + & + ORI + & + DEST + API_KEY
+
+//landing point
 app.get('/', function (req, res) {
-	// do something about it
+	res.sendFile("/Users/zliu/Desktop/InstaFind/frontend/index.html");
+	// absolute path is required, so this is not gonna work for everyone 
 });
 
-app.post('/things', function(req, res) {	
-	// do something 
+// experiment on request on data
+app.get("/data", function(req, res) {
+	var dummyJSON = {
+		"url": "http://imgur.com/gallery/0DQQTAv",
+		"location": {
+			"lattitude":37.4233111,
+			"longtitude": 122.07064579999997 
+		},
+		"name": "LinkedIn"
+	}
+	var list = [];
+	for (i < 0; i < 10; i++) {
+		list.push(dummyJSON)
+	}
+
+	// push data back 
+});
+
+// sample post request
+app.post('/choice', function(req, res) {	
+	// var choiceNumber = req.param("choice");
+	// choiceNumber = parseInt(choiceNumber);
+	// console.log(choiceNumber);
+	// res.sendFile("/Users/zliu/Desktop/InstaFind/backend/b.html");
 });
 
 app.listen(8080, function(){

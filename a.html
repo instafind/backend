@@ -1,0 +1,109 @@
+<style type="text/css">
+	.side{
+		width: 50%;
+		background-color: red;
+		height: 100%;
+		float: left;
+	}
+	
+	#keyboard {
+		height: 100%;
+		float:left;
+		width: 100%;
+	}
+
+	.button {
+		height: 33%;
+		font-size: 40px;
+		color: white;
+		text-align: center;
+		text-transform: uppercase;
+		line-height: 40px;
+	}
+
+
+</style>
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no" />
+<meta name="mobile-web-app-capable" content="yes">
+
+
+<div id='keyboard'>
+	<div id='left' class='side'>
+		<div class='button' style='background-color: green' id='1'>
+		q w e r t
+		</div>
+		<div class='button' style='background-color: blue' id='2'>
+		a s d f g
+		</div>
+		<div class='button' style='background-color: black' id='3'>
+		z x c v
+		</div>
+	</div>
+	<div id='right' class='side'>
+		<div class='button' style='background-color: cyan' id='4'>
+		y u i o p
+		</div>
+		<div class='button' style='background-color: brown' id='5'>
+		h j k l
+		</div>
+		<div class='button' style='background-color: purple' id='6'>
+		b n m
+		</div>
+	</div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
+
+<script type="text/javascript">
+
+
+	word = ''
+	timer = null
+	$(".button").on("click", function(e){ 
+	// $(".button").on("touchstart", function(e){
+		word += $(e.target).attr('id')
+
+		setTimeout(function(){
+			window.color_old = $(e.target).css('background-color')
+			$(e.target).css('background-color', 'red')
+			setTimeout(function(){
+				$(e.target).css('background-color', color_old)				
+			}, 100)
+		}, 100)
+
+
+		clearTimeout(timer)
+		timer = setTimeout(function(){
+			$.ajax({
+				type: "POST",
+				url: "choice?choice="+"5",
+				dataType: "json",
+				success: function( data, textStatus, jqXHR) {
+					word = data.words
+					// window.display_flash = $("<div>",
+					// 	{'text': word}
+					// ).css({
+					// 	'width': '100%',
+					// 	'height': '100%',
+					// 	'z-index': '100',
+					// 	'position': 'absolute',
+					// 	'background-color': 'white',
+					// 	'font-size': '30px',
+					// 	'text-align': 'center'
+					// }).appendTo('body')
+					word = '';
+					// console.log(word);
+					// console.log("^suppose to clear here");
+					// setTimeout(function(){
+					// 	display_flash.remove()
+					// }, 400)
+
+
+				},
+			});
+
+		}, 150)
+	})
+</script>

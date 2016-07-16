@@ -23,7 +23,7 @@ var user_data = []
 app.get("/auth", function(req, res) {
 	var clientCode = req.param("code");
 
-	// console.log(clientCode)
+	console.log(clientCode)
 	var reqUrl = "https://api.instagram.com/oauth/access_token"
 	var reqBody = {
 		"client_id":"a0cb68128abd4ef99d23451fe30657a6",
@@ -54,8 +54,6 @@ app.get("/auth", function(req, res) {
 						url: onionURL,
 						method:"GET"
 					}, function(error, response, body) {
-
-						var raw_onion = JSON.parse(body);
 						raw_onion = raw_onion["data"]
 						for  (var post of raw_onion) {
 							console.log(post["location"]["name"]);
@@ -101,6 +99,7 @@ app.get("/data", function(req, res) {
 	console.log(user_data);
 	var interestList = user_data
 
+	// query for every interest point
 	var list = []
 	for (i = 0; i < interestList.length; i++) {
 		var corLocation = interestList[i];
@@ -151,6 +150,9 @@ app.get("/data", function(req, res) {
 			return js1["duration"]["value"] - js2["duration"]["value"];
 		});
 		console.log(list);
+
+		//push data back
+		//return type template
 		res.json(list);
 	}, 300);
 

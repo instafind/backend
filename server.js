@@ -1,7 +1,9 @@
 var express = require('express');
-var http = require('http');
-var server = http.createServer(app);
+// var http = require('http');
+// var server = http.createServer(app);
 var app = express();
+var path = require("path");
+
 
 var API_KEY = "key=AIzaSyCx6MMMEoT9dFT0okzS77vk80sNqLJIgjo"
 var MAP_API = "https://maps.googleapis.com/maps/api/distancematrix/"
@@ -15,11 +17,10 @@ var DEST = "destinations="
 
 //landing point
 app.get('/', function (req, res) {
-	res.sendFile("/Users/zliu/Desktop/InstaFind/frontend/index.html");
-	// absolute path is required, so this is not gonna work for everyone 
+	res.sendFile('index.html' , { root : path.join(__dirname, "../frontend")});
 });
 
-// experiment on request on data
+// template request on data
 app.get("/data", function(req, res) {
 	var dummyJSON = {
 		"url": "http://imgur.com/gallery/0DQQTAv",
@@ -34,14 +35,14 @@ app.get("/data", function(req, res) {
 		list.push(dummyJSON)
 	}
 
-	// push data back 
+	// push data back?
 });
 
-// sample post request
+// tempalte post request
 app.post('/choice', function(req, res) {	
-	// var choiceNumber = req.param("choice");
-	// choiceNumber = parseInt(choiceNumber);
-	// console.log(choiceNumber);
+	var choiceNumber = req.param("choice");
+	choiceNumber = parseInt(choiceNumber);
+	console.log(choiceNumber);
 	// res.sendFile("/Users/zliu/Desktop/InstaFind/backend/b.html");
 });
 

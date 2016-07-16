@@ -106,9 +106,8 @@ app.get("/data", function(req, res) {
 		console.log(list);
 		//push data back
 		//return type template
-		res.send(JSON.stringify(list))
-		res.sendStatus(200)
-	}, 500);
+		res.json(list);
+	}, 300);
 
 
 });

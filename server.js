@@ -1,27 +1,24 @@
 var express = require('express');
+var path = require('path');
+var request = require('request');
+var config = require('./config.json');
+
 var app = express();
-var path = require("path");
-var request = require("request")
 
 //static var for google maps api
-var API_KEY = "key=AIzaSyCx6MMMEoT9dFT0okzS77vk80sNqLJIgjo"
-var MAP_API = "https://maps.googleapis.com/maps/api/distancematrix/"
+var GOOGLE_MAPS_BASE_URL = "https://maps.googleapis.com/maps/api/distancematrix/";
 var RETURN_TYPE = "json"
 var UNITS = "units=imperial"
 var MODE = "mode=walking"
 var ORI = "origins="
 var DEST = "destinations="
 
-// MAP_API + RETURN_TYPE + ? +UNITS + & + MODE + & + ORI + & + DEST + & + API_KEY
-
-//landing
 app.use('/', express.static('public'));
 
-
-var user_data = []
+var userData = [];
 
 app.get("/auth", function(req, res) {
-	user_data = []
+	userData = []
 	var clientCode = req.param("code");
 
 	console.log(clientCode)
@@ -49,7 +46,6 @@ app.get("/auth", function(req, res) {
 				}, function(error, response, body) {
 					followed_data = JSON.parse(body);
 					var id = followed_data["data"][0]["id"];
-					// console.log(id);
 					var onionURL ="https://api.instagram.com/v1/users/" + id + "/media/recent/?access_token=" + access_token;
 					request({
 						url: onionURL,
@@ -59,7 +55,7 @@ app.get("/auth", function(req, res) {
 						raw_onion = raw_onion["data"];
 						for  (var post of raw_onion) {
 							console.log(post["location"]["name"]);
-							user_data.push( {
+							userData.push( {
 								"name": post["location"]["name"],
 								"latitude": post["location"]["latitude"],
 								"longitude": post["location"]["longitude"],
@@ -71,23 +67,22 @@ app.get("/auth", function(req, res) {
 			);
 		}
 	});
-	res.redirect("/#!/search");
-
-
+  res.redirect("/#!/search");
 });
 
 app.get("/insta", function(req, res) {
-	var instaURL = "https://api.instagram.com/oauth/authorize/?client_id=a0cb68128abd4ef99d23451fe30657a6&redirect_uri=http://10.16.20.247:8083/auth&response_type=code&scope=public_content"
-	request( {
-			url: instaURL,
-			method: "GET"
-		}, function (error, response, body) {
-		  if (!error && response.statusCode == 200) {
-		  	res.redirect(instaURL);
-		}
-	});
+  var instaURL = "https://api.instagram.com/oauth/authorize/?client_id=a0cb68128abd4ef99d23451fe30657a6&redirect_uri=http://10.16.20.247:8083/auth&response_type=code&scope=public_content"
+  var requestConf = {
+    url: instaURL,
+    method: "GET"
+  }
+  var requestCallback = function (error, response, body) {
+    if (!error && response.statusCode == 200) {
+      res.redirect(instaURL);
+    }
+  }
+  request(requestConf, requestCallback);
 });
-
 
 // template request on geo data
 app.get("/data", function(req, res) {
@@ -98,8 +93,8 @@ app.get("/data", function(req, res) {
 	};
 
 	// sample target locations (Insta API)
-	console.log(user_data);
-	var interestList = user_data
+	console.log(userData);
+	var interestList = userData
 
 	// query for every interest point
 	var list = []
@@ -117,7 +112,7 @@ app.get("/data", function(req, res) {
 				+ corLocation["latitude"] + ","
 				+ corLocation["longitude"]
 			+ "&" + API_KEY;
-		
+
 			request( {
 				url: reqUrl,
 				method: "GET"
@@ -142,29 +137,17 @@ app.get("/data", function(req, res) {
 			});
 
 		})(corLocation);
-		//issue request to Google Maps API
-		
-
 	}
 	// rank location in order
 	setTimeout(function() {
 		list.sort (function(js1, js2) {
 			return js1["duration"]["value"] - js2["duration"]["value"];
 		});
-		console.log("==================");
-		console.log(list);
-		console.log("==================")
-
-		//push data back
-		//return type template
 		res.json(list);
 	}, 300);
-
-
 });
 
-
-app.listen(8083, function(){
-    //Callback triggered when server is successfully listening. Hurray!
-    console.log("Server listening on: http://localhost:8083");
+var PORT = 8003
+app.listen(PORT, function() {
+  console.log("Server listening on: http://localhost:" + PORT);
 });

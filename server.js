@@ -3,13 +3,6 @@ var path = require('path');
 var request = require('request');
 var config = require('./config.json');
 
-var GOOGLE_MAPS_BASE_URL = "https://maps.googleapis.com/maps/api/distancematrix/";
-var RETURN_TYPE = "json"
-var UNITS = "units=imperial"
-var MODE = "mode=walking"
-var ORI = "origins="
-var DEST = "destinations="
-
 var app = express();
 
 app.use('/', express.static('public'));
@@ -100,22 +93,23 @@ app.get("/data", function(req, res) {
   for (i = 0; i < interestList.length; i++) {
     var corLocation = interestList[i];
     (function(corLocation) {
-    //generate request url
-    var reqUrl = MAP_API + RETURN_TYPE
-      + "?" + UNITS
-      + "&" + MODE
-      + "&" + ORI
-        + myLocation.latitude + ","
-        + myLocation.longitude
-      + "&" + DEST
-        + corLocation["latitude"] + ","
-        + corLocation["longitude"]
-      + "&" + config.GOOGLE_MAPS_API_KEY;
 
-      request( {
-        url: reqUrl,
-        method: "GET"
-      }, function (error, response, body) {
+      var requestConf = {
+        method: 'GET',
+        url: 'https://maps.googleapis.com/maps/api/distancematrix/'
+          + 'json'
+          + "?units=imperial"
+          + "&mode=walking"
+          + "&origins="
+            + myLocation.latitude + ","
+            + myLocation.longitude
+          + "&destinations="
+            + corLocation.latitude + ","
+            + corLocation.longitude
+          + "&key=" + config.GOOGLE_MAPS_API_KEY
+      }
+
+      request(requestConf, function (error, response, body) {
         if (!error && response.statusCode == 200) {
 
           // add into list of interest point distances

@@ -15,11 +15,11 @@ app.get("/auth", function(req, res) {
     url: 'https://api.instagram.com/oauth/access_token',
     method: 'POST',
     form: {
-      "client_id":"a0cb68128abd4ef99d23451fe30657a6",
-      "client_secret":"7834c945f05c4a2baf4f96cb088e0cd6",
-      "grant_type":"authorization_code",
-      "redirect_uri":"http://10.16.20.247:8083/auth",
-      "code": req.param("code")
+      client_id: "a0cb68128abd4ef99d23451fe30657a6",
+      client_secret: "7834c945f05c4a2baf4f96cb088e0cd6",
+      grant_type: "authorization_code",
+      redirect_uri: "http://10.16.20.247:8083/auth",
+      code: req.param("code")
     }
   }
   var requestCallback = function (error, response, body) {
@@ -111,30 +111,28 @@ app.get("/data", function(req, res) {
 
       request(requestConf, function (error, response, body) {
         if (!error && response.statusCode == 200) {
-
           // add into list of interest point distances
           data = JSON.parse(body);
-          data = {
-          "image_url": corLocation["image_url"],
-          "location": {
-            "latitude": corLocation["latitude"],
-            "longitude": corLocation['longitude']
-          },
-          "distance": data["rows"][0]["elements"][0]["distance"],
-          "duration": data["rows"][0]["elements"][0]["duration"],
-          "name": corLocation["name"],
-          "address": data["destination_addresses"][0]
+          processedData = {
+            imageUrl: corLocation["image_url"],
+            location: {
+              latitude: corLocation.latitude,
+              longitude: corLocation.longitude
+            },
+            distance: data.rows[0].elements[0].distance,
+            duration: data.rows[0].elements[0].duration,
+            name: corLocation.name,
+            address: data.destination_addresses[0]
           };
-          list.push(data);
+          list.push(processedData);
         }
       });
-
     })(corLocation);
   }
   // rank location in order
   setTimeout(function() {
-    list.sort (function(js1, js2) {
-      return js1["duration"]["value"] - js2["duration"]["value"];
+    list.sort(function(item1, item2) {
+      return item1.duration.value - item2.duration.value;
     });
     res.json(list);
   }, 300);
